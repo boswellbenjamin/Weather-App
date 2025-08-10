@@ -143,7 +143,7 @@ class _CitySearchScreenState extends State<CitySearchScreen> {
                                 Container(
                                   padding: EdgeInsets.all(12),
                                   decoration: BoxDecoration(
-                                    color: Colors.deepPurple.withOpacity(0.2),
+                                    color: Colors.deepPurple.withValues(alpha: 0.2),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Icon(
