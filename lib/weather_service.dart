@@ -149,6 +149,7 @@ class WeatherService {
           '$forecastUrl?lat=$lat&lon=$lon&appid=$apiKey&units=metric';
       final forecastResponse = await http.get(Uri.parse(forecastApiUrl));
 
+
       if (forecastResponse.statusCode != 200) {
         throw Exception(
           'Failed to fetch forecast: ${forecastResponse.statusCode}',
@@ -204,7 +205,10 @@ class WeatherService {
           'pressure': currentData['main']['pressure'],
           'wind_speed': (currentData['wind']['speed'] ?? 0).toDouble(),
           'wind_deg': currentData['wind']['deg'] ?? 0,
-          'weather': currentData['weather'][0],
+          'weather': {
+            ...currentData['weather'][0],
+            'description': _simplifyWeatherDescription(currentData['weather'][0]['description']),
+          },
           'sunrise': currentData['sys']['sunrise'],
           'sunset': currentData['sys']['sunset'],
         },
@@ -231,7 +235,10 @@ class WeatherService {
       return {
         'dt': item['dt'],
         'temp': item['main']['temp'].toDouble(),
-        'weather': item['weather'][0],
+        'weather': {
+          ...item['weather'][0],
+          'description': _simplifyWeatherDescription(item['weather'][0]['description']),
+        },
         'pop': ((item['pop'] ?? 0) * 100).round(),
         'wind_speed': (item['wind']['speed'] ?? 0).toDouble(),
         'hour': forecastTime.hour,
@@ -273,7 +280,10 @@ class WeatherService {
       return {
         'dt': item['dt'],
         'temp': temp,
-        'weather': weather,
+        'weather': {
+          ...weather,
+          'description': _simplifyWeatherDescription(weather['description']),
+        },
         'pop': ((item['pop'] ?? 0) * 100).round(),
         'wind_speed': windSpeed,
         'hour': forecastTime.hour,
@@ -281,6 +291,45 @@ class WeatherService {
         'isThreeHourInterval': false, // True hourly data
       };
     }).toList();
+  }
+
+  static String _simplifyWeatherDescription(String description) {
+    final lowerDesc = description.toLowerCase();
+    
+    // Map complex weather terms to simpler ones
+    if (lowerDesc.contains('squall')) {
+      return lowerDesc.replaceAll('squalls', 'strong gusty winds')
+                     .replaceAll('squall', 'strong gusty winds');
+    }
+    if (lowerDesc.contains('drizzle')) {
+      return lowerDesc.replaceAll('drizzle', 'light rain');
+    }
+    if (lowerDesc.contains('shower')) {
+      return lowerDesc.replaceAll('shower', 'rain');
+    }
+    if (lowerDesc.contains('mist')) {
+      return lowerDesc.replaceAll('mist', 'light fog');
+    }
+    if (lowerDesc.contains('haze')) {
+      return lowerDesc.replaceAll('haze', 'light fog');
+    }
+    if (lowerDesc.contains('overcast')) {
+      return lowerDesc.replaceAll('overcast', 'very cloudy');
+    }
+    if (lowerDesc.contains('broken clouds')) {
+      return lowerDesc.replaceAll('broken clouds', 'mostly cloudy');
+    }
+    if (lowerDesc.contains('scattered clouds')) {
+      return lowerDesc.replaceAll('scattered clouds', 'partly cloudy');
+    }
+    if (lowerDesc.contains('few clouds')) {
+      return lowerDesc.replaceAll('few clouds', 'mostly sunny');
+    }
+    if (lowerDesc.contains('clear sky')) {
+      return lowerDesc.replaceAll('clear sky', 'sunny');
+    }
+    
+    return description; // Return original if no simplification needed
   }
 
   static List<Map<String, dynamic>> _processDailyForecast(
@@ -334,7 +383,10 @@ class WeatherService {
             (a, b) => a > b ? a : b,
           ), // Maximum temp from main.temp
         },
-        'weather': representativeItem['weather'][0],
+        'weather': {
+          ...representativeItem['weather'][0],
+          'description': _simplifyWeatherDescription(representativeItem['weather'][0]['description']),
+        },
         'pop': (avgPop * 100).round(),
       };
     }).toList();
