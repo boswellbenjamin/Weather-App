@@ -123,7 +123,7 @@ class WeatherService {
 
       // Try hourly forecast first (Pro API), fall back to 3-hour intervals
       Map<String, dynamic>? hourlyForecastData;
-      Map<String, dynamic>? standardForecastData;
+      Map<String, dynamic> standardForecastData;
 
       // Try hourly forecast API (Student/Pro subscription)
       try {
@@ -159,11 +159,11 @@ class WeatherService {
       if (hourlyForecastData != null && hourlyForecastData['list'] != null) {
         // Use true hourly data
         hourlyData = _processHourlyForecastPro(hourlyForecastData['list']);
-        dailyData = _processDailyForecast(standardForecastData!['list']);
+        dailyData = _processDailyForecast(standardForecastData['list']);
       } else {
         // Use 3-hour interval data
-        hourlyData = _processHourlyForecast(standardForecastData!['list']);
-        dailyData = _processDailyForecast(standardForecastData!['list']);
+        hourlyData = _processHourlyForecast(standardForecastData['list']);
+        dailyData = _processDailyForecast(standardForecastData['list']);
       }
 
       // Process and structure the data
