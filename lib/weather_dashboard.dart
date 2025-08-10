@@ -168,44 +168,43 @@ class _WeatherDashboardState extends State<WeatherDashboard> {
           // Main Content
           SliverToBoxAdapter(
             child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Hero Weather Card - Full Width
-                  _buildHeroWeatherCard(),
-                  
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Hero Weather Card - Full Width
+                _buildHeroWeatherCard(),
 
-                  SizedBox(height: 32),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 32),
 
-                  // Hourly Forecast
-                  _buildSectionTitle(_getForecastTitle()),
-                  SizedBox(height: 16),
-                  _buildHourlyForecast(),
+                      // Hourly Forecast
+                      _buildSectionTitle(_getForecastTitle()),
+                      SizedBox(height: 16),
+                      _buildHourlyForecast(),
 
-                  SizedBox(height: 32),
+                      SizedBox(height: 32),
 
-                  // Weather Details Grid
-                  _buildSectionTitle('Weather Details'),
-                  SizedBox(height: 16),
-                  _buildWeatherDetailsGrid(),
+                      // Weather Details Grid
+                      _buildSectionTitle('Weather Details'),
+                      SizedBox(height: 16),
+                      _buildWeatherDetailsGrid(),
 
-                  SizedBox(height: 32),
+                      SizedBox(height: 32),
 
-                  // 5-Day Forecast
-                  _buildSectionTitle('5-Day Forecast'),
-                  SizedBox(height: 16),
-                  _buildDailyForecast(),
+                      // 5-Day Forecast
+                      _buildSectionTitle('5-Day Forecast'),
+                      SizedBox(height: 16),
+                      _buildDailyForecast(),
 
-                        SizedBox(height: 32),
-                      ],
-                    ),
+                      SizedBox(height: 32),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -471,13 +470,6 @@ class _WeatherDashboardState extends State<WeatherDashboard> {
       mainAxisSpacing: 16,
       childAspectRatio: 1.1,
       children: [
-        _buildDetailCard(
-          'Visibility',
-          '${current['visibility'].toStringAsFixed(1)}',
-          'km',
-          Icons.visibility_rounded,
-          Colors.teal.shade400,
-        ),
         _buildDetailCard(
           'Pressure',
           '${current['pressure']}',

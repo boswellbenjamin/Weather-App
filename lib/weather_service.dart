@@ -124,14 +124,14 @@ class WeatherService {
       // Try hourly forecast first (Pro API), fall back to 3-hour intervals
       Map<String, dynamic>? hourlyForecastData;
       Map<String, dynamic>? standardForecastData;
-      
+
       // Try hourly forecast API (Student/Pro subscription)
       try {
         final hourlyApiUrl =
             '$hourlyForecastUrl?lat=$lat&lon=$lon&appid=$apiKey&units=metric';
         print('Trying hourly API: $hourlyApiUrl');
         final hourlyResponse = await http.get(Uri.parse(hourlyApiUrl));
-        
+
         print('Hourly API response status: ${hourlyResponse.statusCode}');
         if (hourlyResponse.statusCode == 200) {
           hourlyForecastData = json.decode(hourlyResponse.body);
@@ -143,7 +143,7 @@ class WeatherService {
       } catch (e) {
         print('Hourly API error: $e');
       }
-      
+
       // Fetch 5-day forecast (3-hour intervals) as fallback
       final forecastApiUrl =
           '$forecastUrl?lat=$lat&lon=$lon&appid=$apiKey&units=metric';
@@ -156,11 +156,11 @@ class WeatherService {
       }
 
       standardForecastData = json.decode(forecastResponse.body);
-      
+
       // Process forecast data - use hourly if available, otherwise 3-hour intervals
       List<Map<String, dynamic>> hourlyData;
       List<Map<String, dynamic>> dailyData;
-      
+
       if (hourlyForecastData != null && hourlyForecastData['list'] != null) {
         // Use true hourly data
         print('=== Using Hourly Forecast API ===');
@@ -169,7 +169,9 @@ class WeatherService {
           final item = hourlyForecastData['list'][i];
           final time = DateTime.fromMillisecondsSinceEpoch(item['dt'] * 1000);
           final temp = item['main']?['temp'] ?? item['temp'] ?? 'unknown';
-          print('  ${time.hour}:00 - ${temp}°C (${item['dt_txt'] ?? 'no time text'})');
+          print(
+            '  ${time.hour}:00 - ${temp}°C (${item['dt_txt'] ?? 'no time text'})',
+          );
         }
         hourlyData = _processHourlyForecastPro(hourlyForecastData['list']);
         dailyData = _processDailyForecast(standardForecastData!['list']);
@@ -177,7 +179,11 @@ class WeatherService {
         // Use 3-hour interval data
         print('=== Using 3-Hour Forecast API ===');
         print('First few 3-hour items:');
-        for (int i = 0; i < 5 && i < standardForecastData!['list'].length; i++) {
+        for (
+          int i = 0;
+          i < 5 && i < standardForecastData!['list'].length;
+          i++
+        ) {
           final item = standardForecastData!['list'][i];
           final time = DateTime.fromMillisecondsSinceEpoch(item['dt'] * 1000);
           final temp = item['main']['temp'];
@@ -196,8 +202,6 @@ class WeatherService {
           'feels_like': currentData['main']['feels_like'].toDouble(),
           'humidity': currentData['main']['humidity'],
           'pressure': currentData['main']['pressure'],
-          'visibility':
-              (currentData['visibility'] ?? 10000) / 1000, // Convert to km
           'wind_speed': (currentData['wind']['speed'] ?? 0).toDouble(),
           'wind_deg': currentData['wind']['deg'] ?? 0,
           'weather': currentData['weather'][0],
@@ -242,15 +246,17 @@ class WeatherService {
     List<dynamic> hourlyList,
   ) {
     final now = DateTime.now();
-    
+
     return hourlyList.take(24).map<Map<String, dynamic>>((item) {
-      final forecastTime = DateTime.fromMillisecondsSinceEpoch(item['dt'] * 1000);
-      
+      final forecastTime = DateTime.fromMillisecondsSinceEpoch(
+        item['dt'] * 1000,
+      );
+
       // Handle both possible response structures
       double temp;
       Map<String, dynamic> weather;
       double windSpeed;
-      
+
       if (item['main'] != null) {
         // Standard structure with 'main' object
         temp = item['main']['temp'].toDouble();
@@ -260,9 +266,10 @@ class WeatherService {
         // Direct structure (some student API responses)
         temp = (item['temp'] ?? item['temperature'] ?? 0).toDouble();
         weather = item['weather'][0];
-        windSpeed = (item['wind_speed'] ?? item['wind']['speed'] ?? 0).toDouble();
+        windSpeed = (item['wind_speed'] ?? item['wind']['speed'] ?? 0)
+            .toDouble();
       }
-      
+
       return {
         'dt': item['dt'],
         'temp': temp,
@@ -275,8 +282,6 @@ class WeatherService {
       };
     }).toList();
   }
-
-
 
   static List<Map<String, dynamic>> _processDailyForecast(
     List<dynamic> forecastList,
@@ -322,8 +327,12 @@ class WeatherService {
       return {
         'dt': dayItems.first['dt'],
         'temp': {
-          'min': temps.reduce((a, b) => a < b ? a : b), // Minimum temp from main.temp
-          'max': temps.reduce((a, b) => a > b ? a : b), // Maximum temp from main.temp
+          'min': temps.reduce(
+            (a, b) => a < b ? a : b,
+          ), // Minimum temp from main.temp
+          'max': temps.reduce(
+            (a, b) => a > b ? a : b,
+          ), // Maximum temp from main.temp
         },
         'weather': representativeItem['weather'][0],
         'pop': (avgPop * 100).round(),
