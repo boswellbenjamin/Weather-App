@@ -129,19 +129,13 @@ class WeatherService {
       try {
         final hourlyApiUrl =
             '$hourlyForecastUrl?lat=$lat&lon=$lon&appid=$apiKey&units=metric';
-        print('Trying hourly API: $hourlyApiUrl');
         final hourlyResponse = await http.get(Uri.parse(hourlyApiUrl));
 
-        print('Hourly API response status: ${hourlyResponse.statusCode}');
         if (hourlyResponse.statusCode == 200) {
           hourlyForecastData = json.decode(hourlyResponse.body);
-          print('Successfully got hourly forecast data');
-        } else {
-          print('Hourly API failed with status: ${hourlyResponse.statusCode}');
-          print('Response body: ${hourlyResponse.body}');
         }
       } catch (e) {
-        print('Hourly API error: $e');
+        // Silently fail and use 3-hour forecast as fallback
       }
 
       // Fetch 5-day forecast (3-hour intervals) as fallback
@@ -164,32 +158,10 @@ class WeatherService {
 
       if (hourlyForecastData != null && hourlyForecastData['list'] != null) {
         // Use true hourly data
-        print('=== Using Hourly Forecast API ===');
-        print('First 12 hourly items:');
-        for (int i = 0; i < 12 && i < hourlyForecastData['list'].length; i++) {
-          final item = hourlyForecastData['list'][i];
-          final time = DateTime.fromMillisecondsSinceEpoch(item['dt'] * 1000);
-          final temp = item['main']?['temp'] ?? item['temp'] ?? 'unknown';
-          print(
-            '  ${time.hour}:00 - ${temp}°C (${item['dt_txt'] ?? 'no time text'})',
-          );
-        }
         hourlyData = _processHourlyForecastPro(hourlyForecastData['list']);
         dailyData = _processDailyForecast(standardForecastData!['list']);
       } else {
         // Use 3-hour interval data
-        print('=== Using 3-Hour Forecast API ===');
-        print('First few 3-hour items:');
-        for (
-          int i = 0;
-          i < 5 && i < standardForecastData!['list'].length;
-          i++
-        ) {
-          final item = standardForecastData!['list'][i];
-          final time = DateTime.fromMillisecondsSinceEpoch(item['dt'] * 1000);
-          final temp = item['main']['temp'];
-          print('  ${time.hour}:00 - ${temp}°C (${item['dt_txt']})');
-        }
         hourlyData = _processHourlyForecast(standardForecastData!['list']);
         dailyData = _processDailyForecast(standardForecastData!['list']);
       }
